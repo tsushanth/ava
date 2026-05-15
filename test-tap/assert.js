@@ -1653,6 +1653,9 @@ test('.snapshot() with formatAsCodeBlock option', t => {
 		passes(t, () => a.snapshot('hello', {formatAsCodeBlock: true}));
 
 		callIndex = 0;
+		passes(t, () => a.snapshot('hello', {formatAsCodeBlock: true}));
+
+		callIndex = 0;
 		failsWith(t, () => a.snapshot('world', {formatAsCodeBlock: true}), {
 			assertion: 't.snapshot()',
 			message: 'Did not match snapshot',
