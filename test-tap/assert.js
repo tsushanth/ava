@@ -1626,6 +1626,40 @@ test('.snapshot() with formatAsCodeBlock option', t => {
 		t.equal(capturedOptions.formatAsCodeBlock, false);
 	}
 
+	// Mismatch detection: rawValue comparison returns concordance descriptors for the diff
+	{
+		const manager = snapshotManager.load({
+			recordNewSnapshots: true,
+			updating: true,
+		});
+		let callIndex = 0;
+		const a = new AssertionsBase({
+			compareWithSnapshot(assertionOptions) {
+				const {record, ...result} = manager.compare({
+					belongsTo: 'test',
+					expected: assertionOptions.expected,
+					formatAsCodeBlock: assertionOptions.formatAsCodeBlock,
+					index: callIndex++,
+					label: `Snapshot ${callIndex}`,
+				});
+				if (record) {
+					record();
+				}
+
+				return result;
+			},
+		});
+
+		passes(t, () => a.snapshot('hello', {formatAsCodeBlock: true}));
+
+		callIndex = 0;
+		failsWith(t, () => a.snapshot('world', {formatAsCodeBlock: true}), {
+			assertion: 't.snapshot()',
+			message: 'Did not match snapshot',
+			formattedDetails: [{label: 'Difference (- actual, + expected):', formatted: /.+/}],
+		});
+	}
+
 	t.end();
 });
 
